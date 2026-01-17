@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+      - name: order
+        image: order-service:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: INVENTORY_URL
+          value: "http://inventory-service:8000"
+        - name: FAIL_RATE
+          value: "0.2"
+        - name: STARTUP_DELAY
+          value: "5"
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
